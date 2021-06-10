@@ -1,0 +1,32 @@
+﻿
+@{ ViewData["Title"] = "Login"; Layout = "~/Views/Shared/_Layout.cshtml";}
+@model Models.Dto.LoginModel;
+
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-header">
+                    Вход
+                </div>
+                <div class="card-body">
+                    <form asp-antiforgery="true" asp-action="Login" asp-controller="Account">
+                        <div>
+                            <div class="form-group">
+                                <label asp-for="Login">Введите логин</label><br />
+                                <input type="text" class="form-control" asp-for="Login" />
+                                <span asp-validation-for="Login"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Password">Введите пароль</label><br />
+                                <input type="password" class="form-control" asp-for="Password" />
+                                <span asp-validation-for="Password"></span>
+                            </div>
+                            <div>
+                                <input type="submit" value="Войти" class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </form>                 
+                </div>
+            </div>
+        </div>
+    </div>

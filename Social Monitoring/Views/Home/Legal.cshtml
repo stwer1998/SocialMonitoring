@@ -1,0 +1,123 @@
+﻿@{
+    ViewData["Title"] = "Социальный мониторинг";
+}
+@model Models.LegalEntity;
+
+<div class="row justify-content-md-center">
+    <div class="col-md-12 my-3">
+        <div class="card text-center">
+            <div class="card-header">Поиск</div>
+            <div class="card-body">
+
+                <form method="post" asp-controller="Home" asp-action="Index">
+                    <div class="input-group">
+                        <input type="number" name="inn" class="form-control" placeholder="Поиск контагентов" />
+                        <div class="input-group-append">
+                            <button class="btn btn-success" type="submit">
+                                <i class="carousel-control-next-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <br />
+    @if (Model == null)
+    {
+        <div class="col-md-12">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Ваш запрос нахотся в очереди</h5>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header text-center">
+                    @Model.ShortName
+                </div>
+                <div class="card-body mx-5">
+                    <div>
+                        <p><strong>Исполнительные производства:</strong></p>
+                        @foreach (var item in Model.FsspModels)
+                        {
+                            <p>@item.Subject</p>
+                        }
+                    </div>
+                    <br />
+                    <div>
+                        <p><strong>Данные налоговых органов</strong></p>
+                        <p>Директор : <a href="/Home/Phsical?inn=@Model.ErgulNalog.Director.Inn">@Model.ErgulNalog.Director.Name</a></p>
+                        <p>@Model.BoNalogModel.StartAction</p>
+                        @foreach (var item in Model.ErgulNalog.Owners)
+                        {
+                            @if (item.OwnerType == Models.OwnerType.PhysicalOwner)
+                            {
+                                <p>Учредитель : <a href="/Home/Phsical?inn=@Model.ErgulNalog.Director.Inn">@Model.ErgulNalog.Director.Name</a> @item.Percent%</p>
+                            }
+                            else
+                            {
+                                <p>Учредитель : <a href="/Home/Legal?inn=@Model.ErgulNalog.Director.Inn">@Model.ErgulNalog.Director.Name</a> @item.Percent%</p>
+
+                            }
+                        }
+                        <br />
+                    </div>
+                    <div>
+                        <p><strong>Финансовые данные:</strong></p>
+                        <p>Выручка: @Model.BoNalogModel.Revenue</p>
+                        <p>Прибыль: @Model.BoNalogModel.Profit</p>
+                        <p>Уставной капитал: @Model.BoNalogModel.AuthorizedCapital</p>
+                        <p>Заемные средства: @Model.BoNalogModel.Borrowings</p>
+                        <p>Кредиторская задолжность: @Model.BoNalogModel.AccountsPayable</p>
+                        <p>Долгострочные обязательства: @Model.BoNalogModel.LongTermCommitment</p>
+                        <p>Краткострочные обязательства: @Model.BoNalogModel.CurrentLiabilities</p>
+                        <p>Капитал и резервы: @Model.BoNalogModel.CapitalAndReserves</p>
+                        <p>Внеоборотные активы: @Model.BoNalogModel.NonCurrentAssets</p>
+                        <p>Оборотные активы: @Model.BoNalogModel.CurrentAssets</p>
+                    </div>
+                    <br />
+                    <div>
+                        <p><strong>Судебные дела:</strong></p>
+                        <p>Ответчик: @Model.KadArbirt.DefendantCaseNumLast3Year</p>
+                        <p>Истец: @Model.KadArbirt.PlaintiffCaseNumLast3Year</p>
+                    </div>
+                    <br />
+                    <div>
+                        <p><strong>Список экстремистов и терористов</strong></p>
+                        @if (Model.InTeroristList)
+                        {
+                            <p>Да</p>
+                        }
+                        else
+                        {
+                            <p>Нет</p>
+                        }
+                    </div>
+                    <div>
+                        <p><strong>@Model.AnaliticsModuleResult</strong></p>
+                        <br />
+                        <p><strong>Адрес: @Model.ErgulNalog.FullAddress</strong></p><br />
+                    </div>
+                    <div class="row justify-content-end">
+                        <form method="post" class="col-2 mx-1" asp-controller="Home" asp-action="Subscribe">
+                            <input type="hidden" name="inn" value="@Model.Inn" />
+                            <input type="submit" class="btn btn-success" value="Подписаться" />
+                        </form>
+                        <form method="post" class="col-2 mx-1" asp-controller="Home" asp-action="Unsubscribe">
+                            <input type="hidden" name="inn" value="@Model.Inn" />
+                            <input type="submit" class="btn btn-danger" value="Отписаться"/>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>

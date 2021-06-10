@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Социальный мониторинг";
+}
+
+<div class="row justify-content-md-center">
+    <div class="col-md-12">
+        <div class="card text-center">
+            <div class="card-header">Поиск</div>
+            <div class="card-body">
+               
+                <form method="post" asp-controller="Home" asp-action="Index">
+                    <div class="input-group">
+                        <input type="number" name="inn" class="form-control" placeholder="Поиск контагентов" />
+                        <div class="input-group-append">
+                            <button class="btn btn-success" type="submit">
+                                <i class="carousel-control-next-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

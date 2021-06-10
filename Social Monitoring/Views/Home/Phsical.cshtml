@@ -1,0 +1,170 @@
+﻿@{
+    ViewData["Title"] = "Социальный мониторинг";
+}
+@model Models.PhysicalPerson;
+
+<div class="row">
+    <div class="col-md-12 my-3 justify-content-md-center">
+        <div class="card text-center">
+            <div class="card-header">Поиск</div>
+            <div class="card-body">
+
+                <form method="post" asp-controller="Home" asp-action="Index">
+                    <div class="input-group">
+                        <input type="number" name="inn" class="form-control" placeholder="Поиск контагентов" />
+                        <div class="input-group-append">
+                            <button class="btn btn-success" type="submit">
+                                <i class="carousel-control-next-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <br />
+    @if (Model == null)
+    {
+        <div class="col-md-12">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Ваш запрос нахотся в очереди</h5>
+                </div>
+            </div>
+        </div>
+    }else if(Model.BithDay == null || Model.BithDay == DateTime.MinValue)
+    {
+    <div class="col-md-12 my-3">
+        <div class="card">
+            <div class="card-header">
+                Заполните все поля для получение полной информации
+            </div>
+            <div class="card-body">
+                <form method="post" asp-controller="Home" asp-action="Phsical">
+                    <div class="input-group">
+                        <div class="form-group">
+                            <input type="hidden" name="Id" value="@Model.Id" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Фамилия</label><br />
+                            <input type="text" name="LastName" value="@Model.LastName" /><br />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Имя</label><br />
+                            <input type="text" name="Name" value="@Model.Name" /><br />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Отчество</label><br />
+                            <input type="text" name="MiddleName" value="@Model.MiddleName" /><br />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Дата рождение</label><br />
+                            <input type="date" name="BithDay" value="@Model.BithDay" /><br />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Сcылка на ВК</label><br />
+                            <input type="text" name="VkName" value="@Model.VkName" /><br />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label></label><br />
+                            <input type="submit" class="btn btn-success" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    }
+    <div class="col-md-12 my-3">
+        <div class="card">
+            <div class="card-header">
+                @Model.LastName @Model.Name @Model.MiddleName
+            </div>
+            <div class="card-body">
+                <div>
+                    <p><strong>Исполнительные производства:</strong></p>
+                    @foreach (var item in Model?.FsspModels)
+                    {
+                        <p>@item.Subject</p>
+                    }
+                </div>
+                <div>
+                    <p><strong>Реестр банкротов</strong></p>
+                    @if (Model.OnBankruptcy)
+                    {
+                        <p>Состоит</p>
+                    }
+                    else
+                    {
+                        <p>Не состоит</p>
+                    }
+                </div>
+                <div>
+                    <p><strong>Реестр недобросовестных поатавщиков</strong></p>
+                    @if (Model.OnUnscrupulousVendors)
+                    {
+                        <p>Состоит</p>
+                    }
+                    else
+                    {
+                        <p>Не состоит</p>
+                    }
+                </div>
+                <div>
+                    <p><strong>Является массовым учредителем</strong></p>
+                    @if (Model.MassOwner)
+                    {
+                        <p>Да</p>
+                    }
+                    else
+                    {
+                        <p>Нет</p>
+                    }
+                </div>
+                <div>
+                    <p><strong>Является массовым директором</strong></p>
+                    @if (Model.MassDirector)
+                    {
+                        <p>Да</p>
+                    }
+                    else
+                    {
+                        <p>Нет</p>
+                    }
+                </div>
+                <div>
+                    <p><strong>Список экстремистов и терористов</strong></p>
+                    @if (Model.InTeroristList)
+                    {
+                        <p>Да</p>
+                    }
+                    else
+                    {
+                        <p>Нет</p>
+                    }
+                </div>
+                <div>
+                    @if (Model.KadArbirt != null)
+                    {
+                        <p><strong>Судебные дела:</strong></p>
+                        <p>Ответчик: @Model.KadArbirt.DefendantCaseNumLast3Year</p>
+                        <p>Истец: @Model.KadArbirt.PlaintiffCaseNumLast3Year</p>}
+                </div>
+                <div>
+                    <p><strong>Данные вк</strong></p>
+                    <p>@Model.VkData</p>
+                </div>
+                <div class="row justify-content-end">
+                    <form method="post" class="col-2 mx-1" asp-controller="Home" asp-action="Subscribe">
+                        <input type="hidden" name="inn" value="@Model.Inn" />
+                        <input type="submit" class="btn btn-success" value="Подписаться" />
+                    </form>
+                    <form method="post" class="col-2 mx-1" asp-controller="Home" asp-action="Unsubscribe">
+                        <input type="hidden" name="inn" value="@Model.Inn" />
+                        <input type="submit" class="btn btn-danger" value="Отписаться" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

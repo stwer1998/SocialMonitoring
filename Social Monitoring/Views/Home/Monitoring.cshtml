@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Социальный мониторинг";
+}
+@model Models.User;
+
+<div class="row justify-content-md-center">
+    <div class="card col-md-12 my-3">
+        <div class="card-header">Мониторинг</div>
+        <div class="card-body">
+            @foreach (var item in Model.Subscriptions)
+            {
+                if (item.LegalEntity != null)
+                {
+                    <div class="my-2">
+                        <p><strong></strong></p>
+                        @foreach (var history in item.LegalEntity.DataHistories)
+                        {
+                            <div class="col-md-2">@history.ChangedDate</div>
+                            <textarea class="col-md-12">@history.OldData</textarea>
+                            <textarea class="col-md-12">@history.NewData</textarea>
+
+                        }
+
+                    </div>}
+                else
+                {
+                    <p><strong>@item.PhyicalPerson.Name</strong></p>
+                    @foreach (var history in item.PhyicalPerson.DataHistories)
+                    {
+                        <div class="col-md-2">@history.ChangedDate</div>
+                        <div class="col-md-5">@history.OldData</div>
+                        <div class="col-md-5">@history.NewData</div>
+
+                    }
+                }
+            }
+
+        </div>
+    </div>
+</div>
