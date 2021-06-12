@@ -63,10 +63,23 @@ namespace Parser
             return legalEntities;
         }
 
+        public static async Task<IEnumerable<PhysicalPerson>> Parse(IEnumerable<PhysicalPerson> legalEntities)
+        {
+            var t1 = Task.Run(() => KadArbitr.Parse(legalEntities));
+            var t2 = Task.Run(() => Bankrot.Parse(legalEntities));
+            var t3 = Task.Run(() => BoNalog.Parse(legalEntities));
+            var t4 = Task.Run(() => EgrulNalog.Parse(legalEntities));
+            var t5 = Task.Run(() => NedobrosovesZakupki.Parse(legalEntities));
+            Task.WaitAll(t1, t2, t3, t4, t5);
+            return legalEntities;
+        }
+
         public static async Task<PhysicalPerson> Parse(PhysicalPerson physicalPerson) 
         {
             if (!ParserWorking)
             {
+                physicalPerson.UpdatedTime = DateTime.Now;
+
                 ParserWorking = true;
                 await KadArbitr.Parse(physicalPerson);
                 await FsspParser.Parse(physicalPerson);
@@ -87,6 +100,7 @@ namespace Parser
                 {
                     ParserWorking = true;
                     legalEntity.QueueState = Models.Models.QueueState.InProgress;
+                    legalEntity.UpdatedTime = DateTime.Now;
                     await EgrulNalog.Parse(legalEntity);
                     await FsspParser.Parse(legalEntity);
                     await KadArbitr.Parse(legalEntity);

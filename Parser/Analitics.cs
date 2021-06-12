@@ -55,7 +55,7 @@ namespace Parser
                 SalesProfit = legalEntity.BoNalogModel.ProfitFromSale,
                 Bancrot = legalEntity.OnBankruptcy,
                 RNP = legalEntity.OnBankruptcy,
-                path = "d:/garbage/3/forestbezssch2.pickle",
+                path = "forestbezssch2.pickle",
                 result = "your result"
             };
 
@@ -65,7 +65,7 @@ namespace Parser
 
             try
             {
-                string python = @"c:\Users\stwer\AppData\Local\Programs\Python\Python39\python.exe";
+                string python = @"Path\python.exe";
 
                 // python app to call 
                 string myPythonApp = scriptPath;

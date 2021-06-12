@@ -65,12 +65,14 @@ namespace Parser
             var dict = new Dictionary<string, KadArbirtModel>();
             foreach (var inn in inns)
             {
-                //var proxy = proxyRepository.GetFreeProxy();
+                var proxy = proxyRepository.GetFreeProxy();
                 var browser = playwright.Firefox.LaunchAsync(headless: false
-                    //, proxy: new ProxySettings { Server = $"{proxy.IpAddress}:{proxy.Port}" }
+                    , proxy: new ProxySettings { Server = $"{proxy.IpAddress}:{proxy.Port}" }
                     ).Result;
                 var model = await ParseStart(inn, browser);
                 dict.Add(inn, model);
+                proxy.LastUsing = DateTime.Now;
+                proxyRepository.Update(proxy);
             }
             return dict;
 

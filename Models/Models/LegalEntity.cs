@@ -80,6 +80,7 @@ namespace Models
         public bool MassAddress { get; set; }
 
         public bool InTeroristList { get; set; }
+        public DateTime UpdatedTime { get; set; }
 
         public override string ToString()
         {

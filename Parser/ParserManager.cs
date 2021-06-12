@@ -19,6 +19,18 @@ namespace Parser
             db = new ApplicationContext();
         }
 
+        public async void Update()
+        {
+            var legals = db.LegalEntities.Where(x => x.UpdatedTime < DateTime.Now.AddDays(-7)).ToList();
+            await Parser.Parse(legals);
+            db.LegalEntities.UpdateRange(legals);
+
+
+            var physical = db.PhyicalPeople.Where(x => x.UpdatedTime < DateTime.Now.AddDays(-7)).ToList();
+            await Parser.Parse(physical);
+            db.PhyicalPeople.UpdateRange(physical);
+        }
+
         public PhysicalPerson GetPhysicalOrParse(string inn)
         {
             if (string.IsNullOrEmpty(inn) && inn.Length != 12)

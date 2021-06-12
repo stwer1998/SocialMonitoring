@@ -1,4 +1,5 @@
 ﻿using Models;
+using Models.DAL;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,13 @@ namespace Parser
     public class FsspParser : IParser
     {
         readonly HttpClient httpClient;
-        readonly string token;
-
+        readonly FsspToken token;
+        private readonly ITokenRepository tokenRepository;
         public FsspParser()
         {
             httpClient = new HttpClient();
-            token = "";
+            tokenRepository = new TokenRepository();
+            token = tokenRepository.GetFreeFsspToken();
         }
 
         public async Task<PhysicalPerson> Parse(PhysicalPerson physicalPerson)
@@ -28,23 +30,30 @@ namespace Parser
                 return physicalPerson;
             }
 
-            var request = $"https://api-ip.fssprus.ru/api/v1.0/search/physical?token={token}&region={physicalPerson.Inn.ToString().Substring(0,2)}&firstname={physicalPerson.Name}" +
+            var request = $"https://api-ip.fssprus.ru/api/v1.0/search/physical?token={token.Token}&region={physicalPerson.Inn.ToString().Substring(0,2)}&firstname={physicalPerson.Name}" +
                 $"&lastname={physicalPerson.LastName}&secondname={physicalPerson.MiddleName}&birthdate={physicalPerson.BithDay.ToString("dd.MM.yyyy")}";
+            token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
             var response = await httpClient.GetStringAsync(request);
             var result = JsonConvert.DeserializeObject<QueueObjecy>(response);
 
             int status = 1;
-            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token}&task={result.response.task}");
+            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token.Token}&task={result.response.task}");
+            token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
+
             status = JsonConvert.DeserializeObject<MyRootobject>(response).response.status;
             while (status != 0)
             {
                 Console.WriteLine("Sleep");
                 Thread.Sleep(5000);
-                response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token}&task={result.response.task}");
+                response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token.Token}&task={result.response.task}");
+                token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
+
                 status = JsonConvert.DeserializeObject<MyRootobject>(response).response.status;
             }
 
-            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/result?token={token}&task={result.response.task}");
+            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/result?token={token.Token}&task={result.response.task}");
+            token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
+
 
             var finalres = JsonConvert.DeserializeObject<ResultObject>(response);
 
@@ -58,7 +67,7 @@ namespace Parser
                 Name = x.name,
                 Subject = x.subject
             }).ToList();
-
+            tokenRepository.UpdateToken(token);
             return physicalPerson;
 
         }
@@ -88,25 +97,32 @@ namespace Parser
                 return legalEntity;
             // to queue
             //var s = $"https://api-ip.fssprus.ru/api/v1.0/search/legal?token={token}&region={legalEntity.RegionNum}&name={legalEntity.ShortName.Replace("\"", "")}";
-            var response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/search/legal?token={token}&region={legalEntity.RegionNum}&name={legalEntity.ShortName.Replace("\"","")}");
+            var response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/search/legal?token={token.Token}&region={legalEntity.RegionNum}&name={legalEntity.ShortName.Replace("\"","")}");
+            token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
+
             var result = JsonConvert.DeserializeObject<QueueObjecy>(response);
             int status = 1;
 
             //check status request
-            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token}&task={result.response.task}");
+            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token.Token}&task={result.response.task}");
+            token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
+
             status = JsonConvert.DeserializeObject<MyRootobject>(response).response.status;
             while (status != 0)
             {
                 Console.WriteLine("Sleep");
                 Thread.Sleep(5000);
-                response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token}&task={result.response.task}");
+                response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/status?token={token.Token}&task={result.response.task}");
+                token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
+
                 status = JsonConvert.DeserializeObject<MyRootobject>(response).response.status;
             }
 
             //Максимальное число одиночных запросов в час ­— 100. (Ограничение на одиночные запросы считается, как минус час от текущего времени)
             //Максимальное число одиночных запросов в сутки ­— 1000. (Ограничение на одиночные запросы считается, как минус сутки от текущего времени)
 
-            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/result?token={token}&task={result.response.task}");
+            response = await httpClient.GetStringAsync($"https://api-ip.fssprus.ru/api/v1.0/result?token={token.Token}&task={result.response.task}");
+            token.TokenUsings.Add(new FsspTokenUsing { UsingDateTime = DateTime.Now });
 
             var finalres = JsonConvert.DeserializeObject<ResultObject>(response);
 
@@ -122,7 +138,7 @@ namespace Parser
                     }).ToList();
 
             return legalEntity;
-
+            tokenRepository.UpdateToken(token);
 
         }
 
